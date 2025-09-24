@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Random Number Widget (Auto-resizing)</title>
+  <style>
+    body{margin:0;padding:0;background:transparent}
+    .rng-widget{font-family:Inter, system-ui, sans-serif; background:#0b0b0f; color:#f7f7f8; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.5); width:260px; padding:12px; box-sizing:border-box;}
+    .rng-controls{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+    .rng-controls input{flex:1;min-width:0;padding:4px 6px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#f7f7f8;font-size:14px}
+    .rng-controls button{flex:1;padding:6px;border-radius:6px;border:0;background:#3ddc97;color:#042018;font-weight:700;cursor:pointer;font-size:14px}
+    .rng-display{display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.05);border-radius:8px;padding:20px;text-align:center;font-size:36px;font-weight:800;min-height:70px;word-break:break-word}
+    .rng-meta{margin-top:6px;font-size:12px;color:rgba(255,255,255,0.6);text-align:center}
+  </style>
+</head>
+<body>
+  <div class="rng-widget">
+    <div class="rng-controls">
+      <input id="min" type="number" value="1" aria-label="Minimum">
+      <input id="max" type="number" value="100" aria-label="Maximum">
+      <button id="generate">Go</button>
+    </div>
+    <div class="rng-display" id="number">–</div>
+    <div class="rng-meta" id="last">No previous</div>
+  </div>
+
+<script>
+  const minEl = document.getElementById('min');
+  const maxEl = document.getElementById('max');
+  const genBtn = document.getElementById('generate');
+  const numEl = document.getElementById('number');
+  const lastEl = document.getElementById('last');
+
+  function generateRandom() {
+    let min = parseInt(minEl.value,10);
+    let max = parseInt(maxEl.value,10);
+    if (Number.isNaN(min)) min = 1;
+    if (Number.isNaN(max)) max = 100;
+    if (min > max) [min,max] = [max,min];
+    const range = max - min + 1;
+    let n;
+    if (window.crypto && window.crypto.getRandomValues) {
+      const rand = window.crypto.getRandomValues(new Uint32Array(1))[0] / 0x100000000;
+      n = Math.floor(rand * range) + min;
+    } else {
+      n = Math.floor(Math.random() * range) + min;
+    }
+    numEl.textContent = n;
+    lastEl.textContent = `Last: ${n}`;
+    resizeParentIframe();
+  }
+
+  genBtn.addEventListener('click', generateRandom);
+
+  function resizeParentIframe(){
+    if (window.parent && window.parent !== window) {
+      const h = document.documentElement.scrollHeight;
+      window.parent.postMessage({rngWidgetHeight: h}, '*');
+    }
+  }
+
+  window.addEventListener('load', resizeParentIframe);
+  window.addEventListener('resize', resizeParentIframe);
+</script>
+</body>
+</html>
+
+<!-- EMBED SNIPPET -->
+<!-- Save this file as rng-widget.html and upload it. Then embed it using: -->
+<!-- <iframe id="rngFrame" src="rng-widget.html" style="border:none;width:280px;"></iframe> -->
+<!-- <script>
+window.addEventListener('message', (e)=>{
+  if(e.data && e.data.rngWidgetHeight){
+    document.getElementById('rngFrame').style.height = e.data.rngWidgetHeight + 'px';
+  }
+});
+</script> -->
