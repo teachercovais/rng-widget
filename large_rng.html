@@ -35,8 +35,8 @@
   function generateRandom() {
     let min = parseInt(minEl.value,10);
     let max = parseInt(maxEl.value,10);
-    if (Number.isNaN(min)) min = 1;
-    if (Number.isNaN(max)) max = 100;
+    if (Number.isNaN(min)) min = 101;
+    if (Number.isNaN(max)) max = 99999;
     if (min > max) [min,max] = [max,min];
     const range = max - min + 1;
     let n;
